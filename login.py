@@ -1,8 +1,7 @@
 import streamlit as st
 import sqlite3
-from gym_app import run_app  # gym app code wrapped in run_app()
 
-# --- Database ---
+# --- Database connection ---
 conn = sqlite3.connect("gym_data.db", check_same_thread=False)
 c = conn.cursor()
 
@@ -16,13 +15,8 @@ c.execute('''CREATE TABLE IF NOT EXISTS users
               code TEXT)''')
 conn.commit()
 
-# --- Initialize session_state keys ---
-for key in ["user_id", "page", "name"]:
-    if key not in st.session_state:
-        st.session_state[key] = None if key=="user_id" else ""
 
-# --- Login / Signup ---
-if st.session_state["user_id"] is None:
+def show_login():
     choice = st.radio("Login / Sign Up", ["Login", "Sign Up"])
 
     if choice == "Sign Up":
@@ -33,11 +27,16 @@ if st.session_state["user_id"] is None:
         code = st.text_input("Password", type="password")
 
         def signup_callback():
+            if not name or not mail or not code:
+                st.error("❌ All fields are required.")
+                return
             try:
                 c.execute("INSERT INTO users (name, age, weight, mail, code) VALUES (?, ?, ?, ?, ?)",
                           (name, age, kilos, mail, code))
                 conn.commit()
                 st.success("✅ Account created! Please log in.")
+                st.session_state["page"] = "login"
+                st.rerun()
             except sqlite3.IntegrityError:
                 st.error("❌ Email already exists.")
 
@@ -47,21 +46,16 @@ if st.session_state["user_id"] is None:
         mail = st.text_input("Email")
         code = st.text_input("Password", type="password")
 
-       
         def login_callback():
             c.execute("SELECT id, name FROM users WHERE mail=? AND code=?", (mail, code))
             user = c.fetchone()
             if user:
                 st.session_state["user_id"] = user[0]
                 st.session_state["name"] = user[1]
-                st.session_state["page"] = "home"  # navigate to home page
+                st.session_state["page"] = "home"
                 st.success("✅ Logged in!")
-                # No need for experimental_rerun()
+                st.rerun()
             else:
                 st.error("❌ Invalid email or password.")
 
         st.button("Login", on_click=login_callback)
-
-# --- Already logged in ---
-else:
-    run_app()
