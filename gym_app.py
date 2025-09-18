@@ -1,12 +1,18 @@
 import streamlit as st
 import sqlite3
 import datetime
+import login
+
+for key, default in [("user_id", None), ("page", "login"), ("name", "")]:
+    if key not in st.session_state:
+        st.session_state[key] = default
+
 
 def run_app():
     # --- Ensure user is logged in ---
     if "user_id" not in st.session_state:
         st.error("❌ You must log in first.")
-        return
+        st.stop()
 
     user_id = st.session_state["user_id"]
 
@@ -413,3 +419,8 @@ def run_app():
             st.info("No exercises available. Add some first.")
 
         st.button("⬅️ Back to Program Page", on_click=lambda: go_to("program_page"))
+
+if st.session_state["user_id"] is None:
+    login.show_login()
+else:
+    run_app()
