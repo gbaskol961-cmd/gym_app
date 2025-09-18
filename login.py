@@ -17,6 +17,7 @@ conn.commit()
 
 
 def show_login():
+    st.title("🏋️ Personal Gym App")
     choice = st.radio("Login / Sign Up", ["Login", "Sign Up"])
 
     if choice == "Sign Up":
