@@ -83,7 +83,7 @@ def run_app():
     # -------------------------
     if st.session_state["page"] == "home":
         st.title("🏋️ Personal Gym App")
-        st.write(f"Hello, {st.session_state.get('user_name', 'User')}!")
+        st.write(f"Hello, {st.session_state.get('user_name', st.session_state['name'])}!")
         st.write("Choose an option:")
 
         st.button("📅 Create a Program", on_click=lambda: go_to("create_program"))
